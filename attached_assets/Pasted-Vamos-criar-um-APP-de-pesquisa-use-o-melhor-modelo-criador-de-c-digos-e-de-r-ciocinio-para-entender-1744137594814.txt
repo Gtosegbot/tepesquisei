@@ -1,0 +1,3387 @@
+Vamos criar um APP de pesquisa, use o melhor modelo criador de códigos e de ráciocinio para entender a lógica da pesquisa, crie a lógica, crie todo o caminho de pastas e subpastas diretórios e sub diretórios, início, o dono da pesquisa faz login com email ou google, e cria o nome da pesquisa na pagina criar nova pesquisa, ID único para ser compartilhado para pesquisadores e entrevistados, pagina criar a pesquisa deve iníciar com 3 perguntas obrigatórias para gerar a lógica da pesquisa, 1- Sexo, divide nosso 100% de publico em categorias de sexo diferentes, 2- faixas etárias, divide sexo em faixas etárias até atingir o 100%de publico e 3- localização, Estado: conjunto de cidades, cidade: conjunto de bairros ou região, norte, sul, leste, oeste..., após preencher essas 3 perguntas, criar as demais perguntas e suas alternativas de resposta, multipla escolha, escolha única, e ambas com descrição digitada, exemplo: você votou em fulano, sim, não, explique por que? botão salvar pergunta e suas alternativas e botão, criar a pesquisa, as pesquisas devem ficar armasenadas em uma pagina e podem ser compartilhadas através de seu ID para pesquisadores (equipe contratada para realizar pesquisa), por link direto com o pesquisado, por email, por SMS, por whatsapp, criar as integrações para SMTP, SMS server, integraõesco watsapp via webhook do 8 ou criar bot robusto que faz as pesquisas de whatsapp a partir do APP, integração whatsapp API, dashboard para métricas em tempo real, bot para métricas, banco de dados local para falta de internet e banco de dsrobusto para guardar as pesquisas, pagina da pesquisa, botão iniciar pesquisa, integra com cloudnary, dispara e guarda o audio da pesquisa e dispara com maps a geolocalização, cada resposta deve ser armazenada e até o final pode ser refeita com botões que voltam para corrigir possíve resosta errada ou que o pesquisado mudou de opinião, botãfinalizar pesquisa, encerra a pesquisa, desiga audio, a localização, salva tudo e volta para o início para responder a proxima pesquisa. pagina de créditos, o dono da pesquisa deve inserir créditos, cada crédito é igual a R$ 1,00 e cada situação deve ter seu pr´po vaor em créditos, envio de email, R$ 0,50, SMS R$ 1,00, whatsapp R$ 3,00 por envio, crédittos devem ser acompanhados no dashboard do dono da pesquisa, devemos ter uma pagina de superadmin para fazer todas as integrações e monitorar todas as pesquisas créditos são colocados por PIX ou paypal como o link é de valor baixo a soa deve poder marcar mais de 1 quantidade ou enviar via pix: <div id="paypal-button-container-P-2DS65966SJ741222HM7UCBNY"></div>
+
+<script src="https://www.paypal.com/sdk/js?client-id=AZI2sTv8bYOkmVRO73vBUXQwupNyLRDQRARKALCehF_fa9lZydHeIYPOZX6X6-c53-l9ZgygdCqA_XHr&vault=true&intent=subscription" data-sdk-integration-source="button-factory"></script> <script> paypal.Buttons({ style: { shape: 'pill', color: 'blue', layout: 'vertical', label: 'subscribe' }, createSubscription: function(data, actions) { return actions.subscription.create({ /* Creates the subscription */ plan_id: 'P-2DS65966SJ741222HM7UCBNY' }); }, onApprove: function(data, actions) { alert(data.subscriptionID); // You can add optional success message for the subscriber here } }).render('#paypal-button-container-P-2DS65966SJ741222HM7UCBNY'); // Renders the PayPal button </script> chave pix assas: ff576050-99a7-4158-b4ea-1eb0db3098ac
+Aplicativo de Pesquisa - Planejamento e Estrutura Completa
+Vou desenvolver a arquitetura e o código para um aplicativo de pesquisa com todas as funcionalidades solicitadas. Este sistema permitirá criar pesquisas, gerenciar respondentes, coletar dados com segmentação demográfica e visualizar resultados em tempo real.
+
+Estrutura de Diretórios
+survey-app/ ├── backend/ │ ├── config/ │ │ ├── database.js │ │ ├── auth.js │ │ ├── smtp.js │ │ ├── sms.js │ │ ├── whatsapp.js │ │ └── cloudinary.js │ ├── controllers/ │ │ ├── authController.js │ │ ├── surveyController.js │ │ ├── responseController.js │ │ ├── paymentController.js │ │ └── adminController.js │ ├── models/ │ │ ├── User.js │ │ ├── Survey.js │ │ ├── Question.js │ │ ├── Response.js │ │ ├── Credit.js │ │ └── Transaction.js │ ├── routes/ │ │ ├── authRoutes.js │ │ ├── surveyRoutes.js │ │ ├── responseRoutes.js │ │ ├── paymentRoutes.js │ │ └── adminRoutes.js │ ├── services/ │ │ ├── emailService.js │ │ ├── smsService.js │ │ ├── whatsappService.js │ │ ├── paymentService.js │ │ ├── locationService.js │ │ └── mediaService.js │ ├── middleware/ │ │ ├── auth.js │ │ ├── credits.js │ │ └── superAdmin.js │ └── app.js ├── frontend/ │ ├── public/ │ │ ├── assets/ │ │ │ ├── images/ │ │ │ ├── icons/ │ │ │ └── fonts/ │ ├── src/ │ │ ├── components/ │ │ │ ├── common/ │ │ │ │ ├── Header.jsx │ │ │ │ ├── Footer.jsx │ │ │ │ ├── Sidebar.jsx │ │ │ │ └── Loader.jsx │ │ │ ├── auth/ │ │ │ │ ├── Login.jsx │ │ │ │ ├── Register.jsx │ │ │ │ └── ForgotPassword.jsx │ │ │ ├── survey/ │ │ │ │ ├── SurveyList.jsx │ │ │ │ ├── SurveyCreate.jsx │ │ │ │ ├── SurveyEdit.jsx │ │ │ │ ├── SurveyShare.jsx │ │ │ │ └── SurveyResponse.jsx │ │ │ ├── questions/ │ │ │ │ ├── QuestionCreate.jsx │ │ │ │ ├── QuestionList.jsx │ │ │ │ └── QuestionTypes/ │ │ │ │ ├── MultipleChoice.jsx │ │ │ │ ├── SingleChoice.jsx │ │ │ │ └── OpenEndedResponse.jsx │ │ │ ├── dashboard/ │ │ │ │ ├── Dashboard.jsx │ │ │ │ ├── MetricsCard.jsx │ │ │ │ ├── Charts.jsx │ │ │ │ └── RealtimeResults.jsx │ │ │ ├── payments/ │ │ │ │ ├── Credits.jsx │ │ │ │ ├── PayPalButton.jsx │ │ │ │ └── PixPayment.jsx │ │ │ └── admin/ │ │ │ ├── SuperAdmin.jsx │ │ │ ├── UserManagement.jsx │ │ │ └── SystemConfig.jsx │ │ ├── pages/ │ │ │ ├── HomePage.jsx │ │ │ ├── LoginPage.jsx │ │ │ ├── SurveyCreationPage.jsx │ │ │ ├── SurveyListPage.jsx │ │ │ ├── SurveyResponsePage.jsx │ │ │ ├── DashboardPage.jsx │ │ │ ├── CreditsPage.jsx │ │ │ └── AdminPage.jsx │ │ ├── services/ │ │ │ ├── authService.js │ │ │ ├── surveyService.js │ │ │ ├── paymentService.js │ │ │ └── locationService.js │ │ ├── utils/ │ │ │ ├── api.js │ │ │ ├── validation.js │ │ │ ├── format.js │ │ │ └── localStorage.js │ │ ├── contexts/ │ │ │ ├── AuthContext.jsx │ │ │ ├── SurveyContext.jsx │ │ │ └── CreditContext.jsx │ │ ├── App.jsx │ │ ├── index.jsx │ │ └── routes.jsx │ ├── package.json │ └── index.html ├── mobile/ │ ├── src/ │ │ ├── components/ │ │ ├── screens/ │ │ ├── services/ │ │ ├── utils/ │ │ └── App.js │ └── package.json ├── database/ │ ├── migrations/ │ └── seeds/ ├── whatsapp-bot/ │ ├── config/ │ ├── handlers/ │ ├── utils/ │ └── index.js ├── docker-compose.yml ├── .env.example ├── README.md └── package.json
+Implementação do Backend
+1. Modelos de Dados (Models)
+User.js
+
+javascript
+const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
+
+const UserSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true
+  },
+  email: {
+    type: String,
+    required: true,
+    unique: true
+  },
+  password: {
+    type: String,
+    required: function() {
+      return this.googleId ? false : true;
+    }
+  },
+  googleId: {
+    type: String
+  },
+  role: {
+    type: String,
+    enum: ['owner', 'researcher', 'admin', 'superadmin'],
+    default: 'owner'
+  },
+  credits: {
+    type: Number,
+    default: 0
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now
+  }
+});
+
+// Hash password before saving
+UserSchema.pre('save', async function(next) {
+  if (!this.isModified('password') || !this.password) return next();
+  
+  const salt = await bcrypt.genSalt(10);
+  this.password = await bcrypt.hash(this.password, salt);
+  next();
+});
+
+// Method to check password validity
+UserSchema.methods.matchPassword = async function(enteredPassword) {
+  if (!this.password) return false;
+  return await bcrypt.compare(enteredPassword, this.password);
+};
+
+module.exports = mongoose.model('User', UserSchema);
+
+Survey.js
+
+javascript
+const mongoose = require('mongoose');
+const shortid = require('shortid');
+
+const SurveySchema = new mongoose.Schema({
+  title: {
+    type: String,
+    required: true
+  },
+  description: {
+    type: String
+  },
+  owner: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
+  surveyId: {
+    type: String,
+    default: shortid.generate,
+    unique: true
+  },
+  status: {
+    type: String,
+    enum: ['draft', 'active', 'completed'],
+    default: 'draft'
+  },
+  questions: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Question'
+  }],
+  demographicFilters: {
+    gender: {
+      options: [String],
+      distribution: Map // percentage distribution
+    },
+    ageRanges: {
+      options: [{
+        min: Number,
+        max: Number,
+        label: String
+      }],
+      distribution: Map // percentage distribution
+    },
+    locations: {
+      state: String,
+      cities: [String],
+      regions: [String],
+      distribution: Map // percentage distribution
+    }
+  },
+  responsesCount: {
+    type: Number,
+    default: 0
+  },
+  responseGoal: {
+    type: Number,
+    default: 100
+  },
+  researchers: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }],
+  createdAt: {
+    type: Date,
+    default: Date.now
+  },
+  updatedAt: {
+    type: Date,
+    default: Date.now
+  }
+});
+
+module.exports = mongoose.model('Survey', SurveySchema);
+
+Question.js
+
+javascript
+const mongoose = require('mongoose');
+
+const QuestionSchema = new mongoose.Schema({
+  survey: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Survey',
+    required: true
+  },
+  text: {
+    type: String,
+    required: true
+  },
+  type: {
+    type: String,
+    enum: ['single', 'multiple', 'open', 'single_with_open', 'multiple_with_open'],
+    required: true
+  },
+  required: {
+    type: Boolean,
+    default: true
+  },
+  options: [{
+    text: String,
+    value: String
+  }],
+  order: {
+    type: Number,
+    required: true
+  },
+  isDemographic: {
+    type: Boolean,
+    default: false
+  },
+  demographicType: {
+    type: String,
+    enum: ['gender', 'age', 'location', null],
+    default: null
+  }
+});
+
+module.exports = mongoose.model('Question', QuestionSchema);
+
+Response.js
+
+javascript
+const mongoose = require('mongoose');
+
+const ResponseSchema = new mongoose.Schema({
+  survey: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Survey',
+    required: true
+  },
+  respondent: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  },
+  answers: [{
+    question: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Question',
+      required: true
+    },
+    selectedOptions: [String],
+    openResponse: String,
+    answeredAt: {
+      type: Date,
+      default: Date.now
+    }
+  }],
+  demographic: {
+    gender: String,
+    ageRange: {
+      min: Number,
+      max: Number
+    },
+    location: {
+      state: String,
+      city: String,
+      region: String,
+      coordinates: {
+        latitude: Number,
+        longitude: Number
+      }
+    }
+  },
+  completedAt: {
+    type: Date
+  },
+  ipAddress: String,
+  deviceInfo: {
+    type: String
+  },
+  audioRecording: {
+    url: String,
+    duration: Number
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now
+  },
+  responseMethod: {
+    type: String,
+    enum: ['web', 'email', 'sms', 'whatsapp', 'in-person'],
+    required: true
+  }
+});
+
+module.exports = mongoose.model('Response', ResponseSchema);
+
+Credit.js
+
+javascript
+const mongoose = require('mongoose');
+
+const CreditSchema = new mongoose.Schema({
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
+  amount: {
+    type: Number,
+    required: true
+  },
+  transactionType: {
+    type: String,
+    enum: ['purchase', 'usage', 'refund'],
+    required: true
+  },
+  usageType: {
+    type: String,
+    enum: ['email', 'sms', 'whatsapp', null],
+    default: null
+  },
+  paymentMethod: {
+    type: String,
+    enum: ['paypal', 'pix', null],
+    default: null
+  },
+  transactionId: {
+    type: String
+  },
+  description: {
+    type: String
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now
+  }
+});
+
+module.exports = mongoose.model('Credit', CreditSchema);
+
+2. Controllers
+authController.js
+
+javascript
+const User = require('../models/User');
+const jwt = require('jsonwebtoken');
+const { OAuth2Client } = require('google-auth-library');
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+// Generate JWT Token
+const generateToken = (id) => {
+  return jwt.sign({ id }, process.env.JWT_SECRET, {
+    expiresIn: '30d'
+  });
+};
+
+// Register User
+exports.register = async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+
+    // Check if user exists
+    const userExists = await User.findOne({ email });
+    if (userExists) {
+      return res.status(400).json({ message: 'User already exists' });
+    }
+
+    // Create user
+    const user = await User.create({
+      name,
+      email,
+      password
+    });
+
+    if (user) {
+      res.status(201).json({
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        credits: user.credits,
+        token: generateToken(user._id)
+      });
+    } else {
+      res.status(400).json({ message: 'Invalid user data' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Login User
+exports.login = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // Check for user
+    const user = await User.findOne({ email });
+
+    if (user && (await user.matchPassword(password))) {
+      res.json({
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        credits: user.credits,
+        token: generateToken(user._id)
+      });
+    } else {
+      res.status(401).json({ message: 'Invalid email or password' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Google Login
+exports.googleLogin = async (req, res) => {
+  try {
+    const { idToken } = req.body;
+    
+    const ticket = await client.verifyIdToken({
+      idToken,
+      audience: process.env.GOOGLE_CLIENT_ID
+    });
+    
+    const { email_verified, name, email, sub: googleId } = ticket.getPayload();
+    
+    if (email_verified) {
+      let user = await User.findOne({ email });
+      
+      if (!user) {
+        // Create new user
+        user = await User.create({
+          name,
+          email,
+          googleId
+        });
+      } else {
+        // Update Google ID if user already exists but logged in with Google for the first time
+        if (!user.googleId) {
+          user.googleId = googleId;
+          await user.save();
+        }
+      }
+      
+      res.json({
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        credits: user.credits,
+        token: generateToken(user._id)
+      });
+    } else {
+      res.status(400).json({ message: 'Google login failed. Email not verified.' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Get User Profile
+exports.getUserProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id).select('-password');
+    if (user) {
+      res.json(user);
+    } else {
+      res.status(404).json({ message: 'User not found' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Update User Profile
+exports.updateUserProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    
+    if (user) {
+      user.name = req.body.name || user.name;
+      user.email = req.body.email || user.email;
+      
+      if (req.body.password) {
+        user.password = req.body.password;
+      }
+      
+      const updatedUser = await user.save();
+      
+      res.json({
+        _id: updatedUser._id,
+        name: updatedUser.name,
+        email: updatedUser.email,
+        role: updatedUser.role,
+        credits: updatedUser.credits,
+        token: generateToken(updatedUser._id)
+      });
+    } else {
+      res.status(404).json({ message: 'User not found' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+surveyController.js (Parcial)
+
+javascript
+const Survey = require('../models/Survey');
+const Question = require('../models/Question');
+const User = require('../models/User');
+const shortid = require('shortid');
+
+// Create new survey
+exports.createSurvey = async (req, res) => {
+  try {
+    const { title, description } = req.body;
+
+    const survey = await Survey.create({
+      title,
+      description,
+      owner: req.user._id,
+      surveyId: shortid.generate()
+    });
+
+    res.status(201).json(survey);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Set demographic filters
+exports.setDemographicFilters = async (req, res) => {
+  try {
+    const { surveyId } = req.params;
+    const { gender, ageRanges, locations } = req.body;
+
+    const survey = await Survey.findOne({ 
+      surveyId, 
+      owner: req.user._id 
+    });
+
+    if (!survey) {
+      return res.status(404).json({ message: 'Survey not found' });
+    }
+
+    // Validate demographic filters
+    // Check if gender distribution totals 100%
+    if (gender) {
+      const totalGenderDist = Object.values(gender.distribution).reduce((sum, val) => sum + Number(val), 0);
+      if (Math.round(totalGenderDist) !== 100) {
+        return res.status(400).json({ message: 'Gender distribution must total 100%' });
+      }
+      survey.demographicFilters.gender = gender;
+    }
+
+    // Check if age range distribution totals 100%
+    if (ageRanges) {
+      const totalAgeDist = Object.values(ageRanges.distribution).reduce((sum, val) => sum + Number(val), 0);
+      if (Math.round(totalAgeDist) !== 100) {
+        return res.status(400).json({ message: 'Age range distribution must total 100%' });
+      }
+      survey.demographicFilters.ageRanges = ageRanges;
+    }
+
+    // Check if location distribution totals 100%
+    if (locations) {
+      const totalLocationDist = Object.values(locations.distribution).reduce((sum, val) => sum + Number(val), 0);
+      if (Math.round(totalLocationDist) !== 100) {
+        return res.status(400).json({ message: 'Location distribution must total 100%' });
+      }
+      survey.demographicFilters.locations = locations;
+    }
+
+    // Create demographic questions
+    if (gender && gender.options && gender.options.length > 0) {
+      const genderQuestion = await Question.create({
+        survey: survey._id,
+        text: 'Qual é o seu sexo?',
+        type: 'single',
+        required: true,
+        options: gender.options.map(g => ({ text: g, value: g })),
+        order: 1,
+        isDemographic: true,
+        demographicType: 'gender'
+      });
+      
+      survey.questions.push(genderQuestion._id);
+    }
+
+    if (ageRanges && ageRanges.options && ageRanges.options.length > 0) {
+      const ageQuestion = await Question.create({
+        survey: survey._id,
+        text: 'Qual é a sua faixa etária?',
+        type: 'single',
+        required: true,
+        options: ageRanges.options.map(a => ({ text: `${a.min} - ${a.max} anos`, value: `${a.min}-${a.max}` })),
+        order: 2,
+        isDemographic: true,
+        demographicType: 'age'
+      });
+      
+      survey.questions.push(ageQuestion._id);
+    }
+
+    if (locations) {
+      const locationQuestion = await Question.create({
+        survey: survey._id,
+        text: 'Qual é a sua localização?',
+        type: 'single',
+        required: true,
+        options: locations.regions ? 
+                 locations.regions.map(r => ({ text: r, value: r })) : 
+                 locations.cities.map(c => ({ text: c, value: c })),
+        order: 3,
+        isDemographic: true,
+        demographicType: 'location'
+      });
+      
+      survey.questions.push(locationQuestion._id);
+    }
+
+    await survey.save();
+    res.json(survey);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Add question to survey
+exports.addQuestion = async (req, res) => {
+  try {
+    const { surveyId } = req.params;
+    const { text, type, required, options } = req.body;
+
+    const survey = await Survey.findOne({ 
+      surveyId, 
+      owner: req.user._id 
+    });
+
+    if (!survey) {
+      return res.status(404).json({ message: 'Survey not found' });
+    }
+
+    const order = survey.questions.length + 1;
+
+    const question = await Question.create({
+      survey: survey._id,
+      text,
+      type,
+      required: required !== undefined ? required : true,
+      options: options || [],
+      order
+    });
+
+    survey.questions.push(question._id);
+    await survey.save();
+
+    res.status(201).json(question);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Get survey by ID
+exports.getSurvey = async (req, res) => {
+  try {
+    const { surveyId } = req.params;
+
+    const survey = await Survey.findOne({ surveyId })
+      .populate('questions')
+      .populate('owner', 'name email');
+
+    if (!survey) {
+      return res.status(404).json({ message: 'Survey not found' });
+    }
+
+    res.json(survey);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Activate survey
+exports.activateSurvey = async (req, res) => {
+  try {
+    const { surveyId } = req.params;
+
+    const survey = await Survey.findOne({ 
+      surveyId, 
+      owner: req.user._id 
+    });
+
+    if (!survey) {
+      return res.status(404).json({ message: 'Survey not found' });
+    }
+
+    // Check if survey has demographic questions
+    if (!survey.demographicFilters.gender || 
+        !survey.demographicFilters.ageRanges || 
+        !survey.demographicFilters.locations) {
+      return res.status(400).json({ 
+        message: 'Survey must have demographic filters (gender, age ranges, and locations) before activation' 
+      });
+    }
+
+    // Check if survey has at least one non-demographic question
+    const nonDemographicQuestions = await Question.find({
+      survey: survey._id,
+      isDemographic: false
+    });
+
+    if (nonDemographicQuestions.length === 0) {
+      return res.status(400).json({
+        message: 'Survey must have at least one non-demographic question'
+      });
+    }
+
+    survey.status = 'active';
+    await survey.save();
+
+    res.json(survey);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Share survey with researcher
+exports.shareSurvey = async (req, res) => {
+  try {
+    const { surveyId } = req.params;
+    const { researcherEmail } = req.body;
+
+    const survey = await Survey.findOne({ 
+      surveyId, 
+      owner: req.user._id 
+    });
+
+    if (!survey) {
+      return res.status(404).json({ message: 'Survey not found' });
+    }
+
+    const researcher = await User.findOne({ email: researcherEmail });
+    
+    if (!researcher) {
+      return res.status(404).json({ message: 'Researcher not found' });
+    }
+
+    // Check if researcher already has access
+    if (survey.researchers.includes(researcher._id)) {
+      return res.status(400).json({ message: 'Researcher already has access to this survey' });
+    }
+
+    survey.researchers.push(researcher._id);
+    await survey.save();
+
+    res.json({ message: 'Survey shared successfully' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Get surveys for owner
+exports.getMySurveys = async (req, res) => {
+  try {
+    const surveys = await Survey.find({ owner: req.user._id })
+      .sort({ createdAt: -1 });
+
+    res.json(surveys);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Get surveys for researcher
+exports.getResearcherSurveys = async (req, res) => {
+  try {
+    const surveys = await Survey.find({ researchers: req.user._id })
+      .populate('owner', 'name email')
+      .sort({ createdAt: -1 });
+
+    res.json(surveys);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+responseController.js (Parcial)
+
+javascript
+const Response = require('../models/Response');
+const Survey = require('../models/Survey');
+const Question = require('../models/Question');
+const { uploadToCloudinary } = require('../services/mediaService');
+
+// Submit survey response
+exports.submitResponse = async (req, res) => {
+  try {
+    const { surveyId } = req.params;
+    const { answers, demographic, audioRecording, coordinates } = req.body;
+
+    const survey = await Survey.findOne({ surveyId }).populate('questions');
+    
+    if (!survey) {
+      return res.status(404).json({ message: 'Survey not found' });
+    }
+
+    if (survey.status !== 'active') {
+      return res.status(400).json({ message: 'Survey is not active' });
+    }
+
+    // Validate demographic data
+    if (!demographic || !demographic.gender || !demographic.ageRange || !demographic.location) {
+      return res.status(400).json({ message: 'Demographic information is required' });
+    }
+
+    // Check if all required questions are answered
+    const requiredQuestionIds = survey.questions
+      .filter(q => q.required)
+      .map(q => q._id.toString());
+
+    const answeredQuestionIds = answers.map(a => a.question.toString());
+    
+    const missingRequiredQuestions = requiredQuestionIds.filter(
+      qId => !answeredQuestionIds.includes(qId)
+    );
+
+    if (missingRequiredQuestions.length > 0) {
+      return res.status(400).json({ 
+        message: 'All required questions must be answered',
+        missingQuestions: missingRequiredQuestions 
+      });
+    }
+
+    // Process audio recording if provided
+    let audioUrl = null;
+    if (audioRecording) {
+      const uploadResult = await uploadToCloudinary(audioRecording, 'audio');
+      audioUrl = uploadResult.url;
+    }
+
+    // Create response
+    const response = new Response({
+      survey: survey._id,
+      answers,
+      demographic,
+      responseMethod: req.body.responseMethod || 'web',
+      ipAddress: req.ip,
+      deviceInfo: req.headers['user-agent'],
+      completedAt: new Date(),
+      ...(req.user && { respondent: req.user._id }),
+      ...(audioUrl && { audioRecording: { url: audioUrl } }),
+      ...(coordinates && { 
+        demographic: {
+          ...demographic,
+          location: {
+            ...demographic.location,
+            coordinates
+          }
+        }
+      })
+    });
+
+    await response.save();
+
+    // Update survey response count
+    survey.responsesCount += 1;
+    await survey.save();
+
+    res.status(201).json({ 
+      message: 'Response submitted successfully',
+      responseId: response._id 
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Get responses for a survey
+exports.getSurveyResponses = async (req, res) => {
+  try {
+    const { surveyId } = req.params;
+    const survey = await Survey.findOne({ surveyId });
+    
+    if (!survey) {
+      return res.status(404).json({ message: 'Survey not found' });
+    }
+
+    // Check if user is authorized to view responses
+    if (survey.owner.toString() !== req.user._id.toString() && 
+        !survey.researchers.includes(req.user._id)) {
+      return res.status(403).json({ message: 'Not authorized to view these responses' });
+    }
+
+    const responses = await Response.find({ survey: survey._id })
+      .populate({
+        path: 'answers.question',
+        model: 'Question'
+      })
+      .sort({ completedAt: -1 });
+
+    res.json(responses);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Get survey statistics
+exports.getSurveyStatistics = async (req, res) => {
+  try {
+    const { surveyId } = req.params;
+    const survey = await Survey.findOne({ surveyId });
+    
+    if (!survey) {
+      return res.status(404).json({ message: 'Survey not found' });
+    }
+
+    // Check if user is authorized to view statistics
+    if (survey.owner.toString() !== req.user._id.toString() && 
+        !survey.researchers.includes(req.user._id)) {
+      return res.status(403).json({ message: 'Not authorized to view these statistics' });
+    }
+
+    const responses = await Response.find({ survey: survey._id });
+    
+    // Calculate statistics
+    const demographicStats = {
+      gender: {},
+      ageRanges: {},
+      locations: {}
+    };
+
+    // Process gender stats
+    responses.forEach(response => {
+      const gender = response.demographic.gender;
+      demographicStats.gender[gender] = (demographicStats.gender[gender] || 0) + 1;
+      
+      const ageRange = `${response.demographic.ageRange.min}-${response.demographic.ageRange.max}`;
+      demographicStats.ageRanges[ageRange] = (demographicStats.ageRanges[ageRange] || 0) + 1;
+      
+      const location = response.demographic.location.region || 
+                       response.demographic.location.city || 
+                       response.demographic.location.state;
+      demographicStats.locations[location] = (demographicStats.locations[location] || 0) + 1;
+    });
+
+    // Process question stats
+    const questions = await Question.find({ survey: survey._id });
+    const questionStats = {};
+    
+    for (const question of questions) {
+      if (question.type === 'open') continue; // Skip open-ended questions
+
+      questionStats[question._id] = {
+        questionText: question.text,
+        type: question.type,
+        options: {}
+      };
+      
+      // Initialize options
+      question.options.forEach(option => {
+        questionStats[question._id].options[option.value] = 0;
+      });
+    }
+
+    // Count answers
+    responses.forEach(response => {
+      response.answers.forEach(answer => {
+        if (!questionStats[answer.question]) return;
+        
+        if (Array.isArray(answer.selectedOptions)) {
+          answer.selectedOptions.forEach(option => {
+            questionStats[answer.question].options[option] = 
+              (questionStats[answer.question].options[option] || 0) + 1;
+          });
+        } else if (answer.selectedOptions) {
+          questionStats[answer.question].options[answer.selectedOptions] = 
+            (questionStats[answer.question].options[answer.selectedOptions] || 0) + 1;
+        }
+      });
+    });
+
+    res.json({
+      total: responses.length,
+      goal: survey.responseGoal,
+      demographicStats,
+      questionStats
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+paymentController.js
+
+javascript
+const User = require('../models/User');
+const Credit = require('../models/Credit');
+const { processPixPayment, verifyPaypalTransaction } = require('../services/paymentService');
+
+// Add credits via PIX
+exports.addCreditsPix = async (req, res) => {
+  try {
+    const { amount } = req.body;
+    const userId = req.user._id;
+
+    if (!amount || amount <= 0) {
+      return res.status(400).json({ message: 'Invalid amount' });
+    }
+
+    // Create PIX transaction
+    const transaction = await processPixPayment(amount, userId);
+
+    res.json({
+      message: 'PIX payment initiated',
+      transactionId: transaction.id,
+      qrCode: transaction.qrCode,
+      pixCopyPaste: transaction.pixCopyPaste,
+      expiresAt: transaction.expiresAt
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Add credits via PayPal
+exports.addCreditsPaypal = async (req, res) => {
+  try {
+    const { paymentId, amount } = req.body;
+    const userId = req.user._id;
+
+    if (!paymentId || !amount || amount <= 0) {
+      return res.status(400).json({ message: 'Invalid payment information' });
+    }
+
+    // Verify PayPal transaction
+    const verified = await verifyPaypalTransaction(paymentId, amount);
+    
+    if (!verified) {
+      return res.status(400).json({ message: 'Failed to verify PayPal transaction' });
+    }
+
+    // Add credits to user
+    const user = await User.findById(userId);
+    user.credits += amount;
+    await user.save();
+
+    // Log the transaction
+    await Credit.create({
+      user: userId,
+      amount,
+      transactionType: 'purchase',
+      paymentMethod: 'paypal',
+      transactionId: paymentId,
+      description: `Added ${amount} credits via PayPal`
+    });
+
+    res.json({
+      message: 'Credits added successfully',
+      newCreditBalance: user.credits
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Verify PIX payment status
+exports.verifyPixPayment = async (req, res) => {
+  try {
+    const { transactionId } = req.params;
+    const userId = req.user._id;
+
+    // Verify payment status
+    const status = await checkPixPaymentStatus(transactionId);
+    
+    if (status === 'paid') {
+      // Find the credit record
+      const creditRecord = await Credit.findOne({ 
+        transactionId,
+        user: userId,
+        transactionType: 'purchase'
+      });
+
+      if (!creditRecord) {
+        return res.status(404).json({ message: 'Transaction not found' });
+      }
+
+      // Check if already processed
+      if (creditRecord.processed) {
+        return res.json({
+          status: 'paid',
+          message: 'Credits already added to your account',
+          amount: creditRecord.amount
+        });
+      }
+
+      // Add credits to user
+      const user = await User.findById(userId);
+      user.credits += creditRecord.amount;
+      await user.save();
+
+      // Mark as processed
+      creditRecord.processed = true;
+      await creditRecord.save();
+
+      res.json({
+        status: 'paid',
+        message: 'Payment confirmed, credits added to your account',
+        amount: creditRecord.amount,
+        newCreditBalance: user.credits
+      });
+    } else {
+      res.json({
+        status,
+        message: status === 'pending' ? 'Payment pending' : 'Payment failed'
+      });
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Get credit transaction history
+exports.getCreditHistory = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    
+    const transactions = await Credit.find({ user: userId })
+      .sort({ createdAt: -1 });
+    
+    res.json(transactions);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Use credits for sending messages
+exports.useCredits = async (req, res) => {
+  try {
+    const { type, quantity } = req.body;
+    const userId = req.user._id;
+    
+    // Define credit cost per type
+    const costs = {
+      email: 0.5,
+      sms: 1.0,
+      whatsapp: 3.0
+    };
+    
+    if (!costs[type]) {
+      return res.status(400).json({ message: 'Invalid message type' });
+    }
+    
+    const totalCost = costs[type] * quantity;
+    
+    // Check if user has enough credits
+    const user = await User.findById(userId);
+    
+    if (user.credits < totalCost) {
+      return res.status(400).json({ 
+        message: 'Insufficient credits',
+        required: totalCost,
+        available: user.credits
+      });
+    }
+    
+    // Deduct credits
+    user.credits -= totalCost;
+    await user.save();
+    
+    // Log transaction
+    await Credit.create({
+      user: userId,
+      amount: -totalCost,
+      transactionType: 'usage',
+      usageType: type,
+      description: `Used ${totalCost} credits for sending ${quantity} ${type} messages`
+    });
+    
+    res.json({
+      message: `Successfully used ${totalCost} credits for ${quantity} ${type} messages`,
+      newCreditBalance: user.credits
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+Implementação do Frontend
+React Components
+SurveyCreate.jsx
+
+jsx
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
+import api from '../../utils/api';
+import { toast } from 'react-toastify';
+
+const SurveyCreate = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [currentStep, setCurrentStep] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [surveyData, setSurveyData] = useState({
+    title: '',
+    description: '',
+    demographicFilters: {
+      gender: {
+        options: ['Masculino', 'Feminino', 'Outro'],
+        distribution: { 'Masculino': 50, 'Feminino': 50, 'Outro': 0 }
+      },
+      ageRanges: {
+        options: [
+          { min: 18, max: 24, label: '18-24' },
+          { min: 25, max: 34, label: '25-34' },
+          { min: 35, max: 44, label: '35-44' },
+          { min: 45, max: 59, label: '45-59' },
+          { min: 60, max: 99, label: '60+' }
+        ],
+        distribution: { '18-24': 20, '25-34': 20, '35-44': 20, '45-59': 20, '60+': 20 }
+      },
+      locations: {
+        state: '',
+        cities: [],
+        regions: [],
+        distribution: {}
+      }
+    },
+    questions: []
+  });
+  
+  const [states, setStates] = useState([]);
+  const [cities, setCities] = useState([]);
+  const [selectedState, setSelectedState] = useState('');
+  const [selectedCities, setSelectedCities] = useState([]);
+  const [newQuestion, setNewQuestion] = useState({
+    text: '',
+    type: 'single',
+    options: [''],
+    required: true
+  });
+
+  // Fetch Brazilian states on component mount
+  useEffect(() => {
+    const fetchStates = async () => {
+      try {
+        const response = await fetch('https://servicodados.ibge.gov.br/api/v1/localidades/estados');
+        const data = await response.json();
+        setStates(data.sort((a, b) => a.nome.localeCompare(b.nome)));
+      } catch (error) {
+        console.error('Error fetching states:', error);
+      }
+    };
+    
+    fetchStates();
+  }, []);
+
+  // Fetch cities when state changes
+  useEffect(() => {
+    if (selectedState) {
+      const fetchCities = async () => {
+        try {
+          const response = await fetch(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${selectedState}/municipios`);
+          const data = await response.json();
+          setCities(data.sort((a, b) => a.nome.localeCompare(b.nome)));
+        } catch (error) {
+          console.error('Error fetching cities:', error);
+        }
+      };
+      
+      fetchCities();
+    } else {
+      setCities([]);
+    }
+  }, [selectedState]);
+
+  const handleStateChange = (e) => {
+    const stateId = e.target.value;
+    setSelectedState(stateId);
+    setSelectedCities([]);
+    
+    // Update survey data
+    const stateName = states.find(state => state.id === parseInt(stateId))?.nome || '';
+    setSurveyData({
+      ...surveyData,
+      demographicFilters: {
+        ...surveyData.demographicFilters,
+        locations: {
+          ...surveyData.demographicFilters.locations,
+          state: stateName,
+          cities: [],
+          regions: [],
+          distribution: {}
+        }
+      }
+    });
+  };
+
+  const handleCitySelection = (e) => {
+    const selectedCityIds = Array.from(e.target.selectedOptions, option => option.value);
+    setSelectedCities(selectedCityIds);
+    
+    // Get city names and update survey data
+    const cityNames = selectedCityIds.map(id => 
+      cities.find(city => city.id === parseInt(id))?.nome || ''
+    ).filter(name => name);
+    
+    // Create equal distribution
+    const distribution = {};
+    const percentage = cityNames.length > 0 ? Math.floor(100 / cityNames.length) : 0;
+    cityNames.forEach((city, index) => {
+      distribution[city] = index === cityNames.length - 1 
+        ? 100 - (percentage * (cityNames.length - 1)) // Give remainder to last city
+        : percentage;
+    });
+    
+    setSurveyData({
+      ...surveyData,
+      demographicFilters: {
+        ...surveyData.demographicFilters,
+        locations: {
+          ...surveyData.demographicFilters.locations,
+          cities: cityNames,
+          regions: [],
+          distribution
+        }
+      }
+    });
+  };
+
+  const handleGenderDistributionChange = (gender, value) => {
+    setSurveyData({
+      ...surveyData,
+      demographicFilters: {
+        ...surveyData.demographicFilters,
+        gender: {
+          ...surveyData.demographicFilters.gender,
+          distribution: {
+            ...surveyData.demographicFilters.gender.distribution,
+            [gender]: parseInt(value) || 0
+          }
+        }
+      }
+    });
+  };
+
+  const handleAgeDistributionChange = (ageRange, value) => {
+    setSurveyData({
+      ...surveyData,
+      demographicFilters: {
+        ...surveyData.demographicFilters,
+        ageRanges: {
+          ...surveyData.demographicFilters.ageRanges,
+          distribution: {
+            ...surveyData.demographicFilters.ageRanges.distribution,
+            [ageRange]: parseInt(value) || 0
+          }
+        }
+      }
+    });
+  };
+
+  const handleLocationDistributionChange = (location, value) => {
+    setSurveyData({
+      ...surveyData,
+      demographicFilters: {
+        ...surveyData.demographicFilters,
+        locations: {
+          ...surveyData.demographicFilters.locations,
+          distribution: {
+            ...surveyData.demographicFilters.locations.distribution,
+            [location]: parseInt(value) || 0
+          }
+        }
+      }
+    });
+  };
+
+  const handleNextStep = () => {
+    if (currentStep === 1) {
+      if (!surveyData.title) {
+        toast.error('Por favor, insira um título para a pesquisa');
+        return;
+      }
+    } else if (currentStep === 2) {
+      // Validate gender distribution totals 100%
+      const genderTotal = Object.values(surveyData.demographicFilters.gender.distribution)
+        .reduce((sum, val) => sum + val, 0);
+      
+      if (Math.round(genderTotal) !== 100) {
+        toast.error('A distribuição de gênero deve totalizar 100%');
+        return;
+      }
+    } else if (currentStep === 3) {
+      // Validate age distribution totals 100%
+      const ageTotal = Object.values(surveyData.demographicFilters.ageRanges.distribution)
+        .reduce((sum, val) => sum + val, 0);
+      
+      if (Math.round(ageTotal) !== 100) {
+        toast.error('A distribuição de faixa etária deve totalizar 100%');
+        return;
+      }
+    } else if (currentStep === 4) {
+      // Validate location distribution totals 100%
+      if (Object.keys(surveyData.demographicFilters.locations.distribution).length === 0) {
+        toast.error('Por favor, selecione pelo menos uma localização');
+        return;
+      }
+      
+      const locationTotal = Object.values(surveyData.demographicFilters.locations.distribution)
+        .reduce((sum, val) => sum + val, 0);
+      
+      if (Math.round(locationTotal) !== 100) {
+        toast.error('A distribuição de localização deve totalizar 100%');
+        return;
+      }
+    }
+    
+    setCurrentStep(currentStep + 1);
+  };
+
+  const handlePrevStep = () => {
+    setCurrentStep(currentStep - 1);
+  };
+
+  const handleAddOption = () => {
+    setNewQuestion({
+      ...newQuestion,
+      options: [...newQuestion.options, '']
+    });
+  };
+
+  const handleOptionChange = (index, value) => {
+    const updatedOptions = [...newQuestion.options];
+    updatedOptions[index] = value;
+    setNewQuestion({
+      ...newQuestion,
+      options: updatedOptions
+    });
+  };
+
+  const handleRemoveOption = (index) => {
+    const updatedOptions = newQuestion.options.filter((_, i) => i !== index);
+    setNewQuestion({
+      ...newQuestion,
+      options: updatedOptions
+    });
+  };
+
+  const handleAddQuestion = () => {
+    if (!newQuestion.text) {
+      toast.error('Por favor, insira o texto da pergunta');
+      return;
+    }
+    
+    if (['single', 'multiple', 'single_with_open', 'multiple_with_open'].includes(newQuestion.type) && 
+        newQuestion.options.filter(option => option.trim()).length < 2) {
+      toast.error('Por favor, adicione pelo menos duas opções');
+      return;
+    }
+    
+    setSurveyData({
+      ...surveyData,
+      questions: [...surveyData.questions, { ...newQuestion }]
+    });
+    
+    // Reset new question form
+    setNewQuestion({
+      text: '',
+      type: 'single',
+      options: [''],
+      required: true
+    });
+    
+    toast.success('Pergunta adicionada com sucesso');
+  };
+
+  const handleCreateSurvey = async () => {
+    if (surveyData.questions.length === 0) {
+      toast.error('Por favor, adicione pelo menos uma pergunta');
+      return;
+    }
+    
+    setLoading(true);
+    
+    try {
+      // First create the survey with basic info
+      const surveyResponse = await api.post('/api/surveys', {
+        title: surveyData.title,
+        description: surveyData.description
+      });
+      
+      const surveyId = surveyResponse.data.surveyId;
+      
+      // Set demographic filters
+      await api.post(`/api/surveys/${surveyId}/demographics`, {
+        gender: surveyData.demographicFilters.gender,
+        ageRanges: surveyData.demographicFilters.ageRanges,
+        locations: surveyData.demographicFilters.locations
+      });
+      
+      // Add each question
+      for (const question of surveyData.questions) {
+        await api.post(`/api/surveys/${surveyId}/questions`, question);
+      }
+      
+      // Activate the survey
+      await api.post(`/api/surveys/${surveyId}/activate`);
+      
+      toast.success('Pesquisa criada com sucesso!');
+      navigate(`/surveys/${surveyId}`);
+    } catch (error) {
+      console.error('Error creating survey:', error);
+      toast.error('Erro ao criar pesquisa. Por favor, tente novamente.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="max-w-4xl mx-auto p-6">
+      <h1 className="text-3xl font-bold mb-6">Criar Nova Pesquisa</h1>
+      
+      {/* Progress Bar */}
+      <div className="w-full bg-gray-200 rounded-full h-2.5 mb-6">
+        <div 
+          className="bg-blue-600 h-2.5 rounded-full" 
+          style={{ width: `${(currentStep / 6) * 100}%` }}
+        ></div>
+      </div>
+      
+      {/* Step 1: Basic Info */}
+      {currentStep === 1 && (
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <h2 className="text-xl font-semibold mb-4">Informações Básicas</h2>
+          <div className="mb-4">
+            <label className="block text-gray-700 mb-2">Título da Pesquisa*</label>
+            <input 
+              type="text" 
+              className="w-full p-2 border rounded"
+              value={surveyData.title}
+              onChange={(e) => setSurveyData({ ...surveyData, title: e.target.value })}
+              required
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-700 mb-2">Descrição (opcional)</label>
+            <textarea 
+              className="w-full p-2 border rounded"
+              value={surveyData.description}
+              onChange={(e) => setSurveyData({ ...surveyData, description: e.target.value })}
+              rows="3"
+            ></textarea>
+          </div>
+          <div className="flex justify-end">
+            <button 
+              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+              onClick={handleNextStep}
+            >
+              Próximo
+            </button>
+          </div>
+        </div>
+      )}
+      
+      {/* Step 2: Gender Distribution */}
+      {currentStep === 2 && (
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <h2 className="text-xl font-semibold mb-4">Distribuição por Gênero</h2>
+          <p className="mb-4 text-gray-600">Defina qual a porcentagem ideal de cada gênero para sua pesquisa. O total deve ser 100%.</p>
+          
+          <div className="mb-6">
+            {surveyData.demographicFilters.gender.options.map(gender => (
+              <div key={gender} className="flex items-center mb-2">
+                <label className="w-1/3 text-gray-700">{gender}</label>
+                <input 
+                  type="number" 
+                  className="w-20 p-2 border rounded"
+                  min="0"
+                  max="100"
+                  value={surveyData.demographicFilters.gender.distribution[gender] || 0}
+                  onChange={(e) => handleGenderDistributionChange(gender, e.target.value)}
+                />
+                <span className="ml-2">%</span>
+              </div>
+            ))}
+            
+            <div className="mt-4 font-semibold">
+              Total: {Object.values(surveyData.demographicFilters.gender.distribution)
+                .reduce((sum, val) => sum + val, 0)}%
+            </div>
+          </div>
+          
+          <div className="flex justify-between">
+            <button 
+              className="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400"
+              onClick={handlePrevStep}
+            >
+              Voltar
+            </button>
+            <button 
+              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+              onClick={handleNextStep}
+            >
+              Próximo
+            </button>
+          </div>
+        </div>
+      )}
+      
+      {/* Step 3: Age Distribution */}
+      {currentStep === 3 && (
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <h2 className="text-xl font-semibold mb-4">Distribuição por Faixa Etária</h2>
+          <p className="mb-4 text-gray-600">Defina qual a porcentagem ideal de cada faixa etária para sua pesquisa. O total deve ser 100%.</p>
+          
+          <div className="mb-6">
+            {surveyData.demographicFilters.ageRanges.options.map(age => (
+              <div key={`${age.min}-${age.max}`} className="flex items-center mb-2">
+                <label className="w-1/3 text-gray-700">{age.min}-{age.max} anos</label>
+                <input 
+                  type="number" 
+                  className="w-20 p-2 border rounded"
+                  min="0"
+                  max="100"
+                  value={surveyData.demographicFilters.ageRanges.distribution[`${age.min}-${age.max}`] || 0}
+                  onChange={(e) => handleAgeDistributionChange(`${age.min}-${age.max}`, e.target.value)}
+                />
+                <span className="ml-2">%</span>
+              </div>
+            ))}
+            
+            <div className="mt-4 font-semibold">
+              Total: {Object.values(surveyData.demographicFilters.ageRanges.distribution)
+                .reduce((sum, val) => sum + val, 0)}%
+            </div>
+          </div>
+          
+          <div className="flex justify-between">
+            <button 
+              className="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400"
+              onClick={handlePrevStep}
+            >
+              Voltar
+            </button>
+            <button 
+              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+              onClick={handleNextStep}
+            >
+              Próximo
+            </button>
+          </div>
+        </div>
+      )}
+      
+      {/* Step 4: Location Selection and Distribution */}
+      {currentStep === 4 && (
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <h2 className="text-xl font-semibold mb-4">Seleção de Localização</h2>
+          
+          <div className="mb-4">
+            <label className="block text-gray-700 mb-2">Estado*</label>
+            <select 
+              className="w-full p-2 border rounded"
+              value={selectedState}
+              onChange={handleStateChange}
+              required
+            >
+              <option value="">Selecione um estado</option>
+              {states.map(state => (
+                <option key={state.id} value={state.id}>{state.nome}</option>
+              ))}
+            </select>
+          </div>
+          
+          {selectedState && (
+            <div className="mb-6">
+              <label className="block text-gray-700 mb-2">Cidades*</label>
+              <select 
+                className="w-full p-2 border rounded"
+                multiple
+                size={5}
+                value={selectedCities}
+                onChange={handleCitySelection}
+                required
+              >
+                {cities.map(city => (
+                  <option key={city.id} value={city.id}>{city.nome}</option>
+                ))}
+              </select>
+              <p className="text-sm text-gray-500 mt-1">
+                Segure Ctrl (ou Cmd no Mac) para selecionar múltiplas cidades
+              </p>
+            </div>
+          )}
+          
+          {surveyData.demographicFilters.locations.cities.length > 0 && (
+            <div className="mb-6">
+              <h3 className="font-semibold mb-2">Distribuição por Localização</h3>
+              <p className="mb-4 text-gray-600">Defina qual a porcentagem ideal de cada cidade para sua pesquisa. O total deve ser 100%.</p>
+              
+              {surveyData.demographicFilters.locations.cities.map(city => (
+                <div key={city} className="flex items-center mb-2">
+                  <label className="w-1/3 text-gray-700">{city}</label>
+                  <input 
+                    type="number" 
+                    className="w-20 p-2 border rounded"
+                    min="0"
+                    max="100"
+                    value={surveyData.demographicFilters.locations.distribution[city] || 0}
+                    onChange={(e) => handleLocationDistributionChange(city, e.target.value)}
+                  />
+                  <span className="ml-2">%</span>
+                </div>
+              ))}
+              
+              <div className="mt-4 font-semibold">
+                Total: {Object.values(surveyData.demographicFilters.locations.distribution)
+                  .reduce((sum, val) => sum + val, 0)}%
+              </div>
+            </div>
+          )}
+          
+          <div className="flex justify-between">
+            <button 
+              className="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400"
+              onClick={handlePrevStep}
+            >
+              Voltar
+            </button>
+            <button 
+              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+              onClick={handleNextStep}
+              disabled={!selectedState || selectedCities.length === 0}
+            >
+              Próximo
+            </button>
+          </div>
+        </div>
+      )}
+      
+      {/* Step 5: Questions */}
+      {currentStep === 5 && (
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <h2 className="text-xl font-semibold mb-4">Adicionar Perguntas</h2>
+          
+          <div className="mb-6">
+            <h3 className="font-semibold mb-2">Perguntas Adicionadas ({surveyData.questions.length})</h3>
+            {surveyData.questions.length === 0 ? (
+              <p className="text-gray-500">Nenhuma pergunta adicionada ainda.</p>
+            ) : (
+              <ul className="border rounded divide-y">
+                {surveyData.questions.map((q, idx) => (
+                  <li key={idx} className="p-3">
+                    <div className="font-medium">{idx + 1}. {q.text}</div>
+                    <div className="text-sm text-gray-500 mt-1">
+                      Tipo: {q.type === 'single' ? 'Escolha única' : 
+                             q.type === 'multiple' ? 'Múltipla escolha' : 
+                             q.type === 'open' ? 'Resposta aberta' : 
+                             q.type === 'single_with_open' ? 'Escolha única com resposta aberta' : 
+                             'Múltipla escolha com resposta aberta'}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+          
+          <div className="border-t pt-4 mb-6">
+            <h3 className="font-semibold mb-4">Nova Pergunta</h3>
+            
+            <div className="mb-4">
+              <label className="block text-gray-700 mb-2">Texto da Pergunta*</label>
+              <input 
+                type="text" 
+                className="w-full p-2 border rounded"
+                value={newQuestion.text}
+                onChange={(e) => setNewQuestion({ ...newQuestion, text: e.target.value })}
+                required
+              />
+            </div>
+            
+            <div className="mb-4">
+              <label className="block text-gray-700 mb-2">Tipo de Pergunta*</label>
+              <select 
+                className="w-full p-2 border rounded"
+                value={newQuestion.type}
+                onChange={(e) => setNewQuestion({ ...newQuestion, type: e.target.value })}
+                required
+              >
+                <option value="single">Escolha única</option>
+                <option value="multiple">Múltipla escolha</option>
+                <option value="open">Resposta aberta</option>
+                <option value="single_with_open">Escolha única com resposta aberta</option>
+                <option value="multiple_with_open">Múltipla escolha com resposta aberta</option>
+              </select>
+            </div>
+            
+            <div className="mb-4">
+              <div className="flex items-center mb-2">
+                <input 
+                  type="checkbox" 
+                  id="required"
+                  className="mr-2"
+                  checked={newQuestion.required}
+                  onChange={(e) => setNewQuestion({ ...newQuestion, required: e.target.checked })}
+                />
+                <label htmlFor="required" className="text-gray-700">Resposta obrigatória</label>
+              </div>
+            </div>
+            
+            {newQuestion.type !== 'open' && (
+              <div className="mb-4">
+                <label className="block text-gray-700 mb-2">Opções de Resposta*</label>
+                {newQuestion.options.map((option, index) => (
+                  <div key={index} className="flex items-center mb-2">
+                    <input 
+                      type="text" 
+                      className="flex-1 p-2 border rounded"
+                      value={option}
+                      onChange={(e) => handleOptionChange(index, e.target.value)}
+                      placeholder={`Opção ${index + 1}`}
+                      required
+                    />
+                    {index > 0 && (
+                      <button 
+                        type="button"
+                        className="ml-2 text-red-500"
+                        onClick={() => handleRemoveOption(index)}
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
+                ))}
+                <button 
+                  type="button"
+                  className="mt-2 text-blue-500 flex items-center"
+                  onClick={handleAddOption}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 mr-1">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                  </svg>
+                  Adicionar opção
+                </button>
+              </div>
+            )}
+            
+            <button 
+              type="button"
+              className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+              onClick={handleAddQuestion}
+            >
+              Adicionar Pergunta
+            </button>
+          </div>
+          
+          <div className="flex justify-between">
+            <button 
+              className="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400"
+              onClick={handlePrevStep}
+            >
+              Voltar
+            </button>
+            <button 
+              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+              onClick={handleNextStep}
+              disabled={surveyData.questions.length === 0}
+            >
+              Próximo
+            </button>
+          </div>
+        </div>
+      )}
+      
+      {/* Step 6: Review and Create */}
+      {currentStep === 6 && (
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <h2 className="text-xl font-semibold mb-4">Revisar e Criar Pesquisa</h2>
+          
+          <div className="mb-6">
+            <h3 className="font-semibold mb-2">Informações Básicas</h3>
+            <p><strong>Título:</strong> {surveyData.title}</p>
+            {surveyData.description && <p><strong>Descrição:</strong> {surveyData.description}</p>}
+          </div>
+          
+          <div className="mb-6">
+            <h3 className="font-semibold mb-2">Filtros Demográficos</h3>
+            <div className="mb-2">
+              <strong>Gênero:</strong>
+              <ul className="list-disc ml-6">
+                {Object.entries(surveyData.demographicFilters.gender.distribution).map(([gender, percentage]) => (
+                  <li key={gender}>{gender}: {percentage}%</li>
+                ))}
+              </ul>
+            </div>
+            <div className="mb-2">
+              <strong>Faixa Etária:</strong>
+              <ul className="list-disc ml-6">
+                {Object.entries(surveyData.demographicFilters.ageRanges.distribution).map(([age, percentage]) => (
+                  <li key={age}>{age} anos: {percentage}%</li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <strong>Localização:</strong>
+              <p>Estado: {surveyData.demographicFilters.locations.state}</p>
+              <ul className="list-disc ml-6">
+                {Object.entries(surveyData.demographicFilters.locations.distribution).map(([location, percentage]) => (
+                  <li key={location}>{location}: {percentage}%</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+          
+          <div className="mb-6">
+            <h3 className="font-semibold mb-2">Perguntas ({surveyData.questions.length})</h3>
+            <ul className="list-decimal ml-6">
+              {surveyData.questions.map((q, idx) => (
+                <li key={idx} className="mb-2">
+                  <div className="font-medium">{q.text}</div>
+                  <div className="text-sm text-gray-500">
+                    Tipo: {q.type === 'single' ? 'Escolha única' : 
+                          q.type === 'multiple' ? 'Múltipla escolha' : 
+                          q.type === 'open' ? 'Resposta aberta' : 
+                          q.type === 'single_with_open' ? 'Escolha única com resposta aberta' : 
+                          'Múltipla escolha com resposta aberta'}
+                    {q.type !== 'open' && (
+                      <div>
+                        Opções: {q.options.filter(o => o.trim()).join(', ')}
+                      </div>
+                    )}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+          
+          <div className="flex justify-between">
+            <button 
+              className="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400"
+              onClick={handlePrevStep}
+            >
+              Voltar
+            </button>
+            <button 
+              className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+              onClick={handleCreateSurvey}
+              disabled={loading}
+            >
+              {loading ? 'Criando...' : 'Criar Pesquisa'}
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default SurveyCreate;
+
+SurveyResponse.jsx
+
+jsx
+import React, { useState, useEffect, useRef } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import api from '../../utils/api';
+import Loader from '../common/Loader';
+
+const SurveyResponse = () => {
+  const { surveyId } = useParams();
+  const navigate = useNavigate();
+  const [survey, setSurvey] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [answers, setAnswers] = useState([]);
+  const [demographic, setDemographic] = useState({
+    gender: '',
+    ageRange: { min: 0, max: 0 },
+    location: {
+      state: '',
+      city: '',
+      region: '',
+      coordinates: { latitude: null, longitude: null }
+    }
+  });
+  const [recording, setRecording] = useState(false);
+  const [audioBlob, setAudioBlob] = useState(null);
+  const mediaRecorderRef = useRef(null);
+  const audioChunksRef = useRef([]);
+  const [currentPosition, setCurrentPosition] = useState(null);
+
+  // Get survey data
+  useEffect(() => {
+    const fetchSurvey = async () => {
+      try {
+        const response = await api.get(`/api/surveys/${surveyId}`);
+        setSurvey(response.data);
+        
+        // Initialize answers array with empty values for each question
+        setAnswers(response.data.questions.map(() => ({
+          question: '',
+          selectedOptions: [],
+          openResponse: ''
+        })));
+        
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching survey:', error);
+        toast.error('Erro ao carregar a pesquisa');
+        setLoading(false);
+      }
+    };
+    
+    fetchSurvey();
+  }, [surveyId]);
+
+  // Get geolocation
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setCurrentPosition({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude
+          });
+          
+          // Update demographic with coordinates
+          setDemographic(prev => ({
+            ...prev,
+            location: {
+              ...prev.location,
+              coordinates: {
+                latitude: position.coords.latitude,
+                longitude: position.coords.longitude
+              }
+            }
+          }));
+        },
+        (error) => {
+          console.error('Error getting location:', error);
+        }
+      );
+    }
+  }, []);
+
+  // Start recording on first render
+  useEffect(() => {
+    if (!loading && survey) {
+      startRecording();
+    }
+    
+    return () => {
+      // Cleanup: stop recording if component unmounts
+      if (mediaRecorderRef.current && recording) {
+        stopRecording();
+      }
+    };
+  }, [loading, survey]);
+
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaRecorderRef.current = new MediaRecorder(stream);
+      
+      mediaRecorderRef.current.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+      
+      mediaRecorderRef.current.onstop = () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
+        setAudioBlob(audioBlob);
+      };
+      
+      audioChunksRef.current = [];
+      mediaRecorderRef.current.start();
+      setRecording(true);
+    } catch (error) {
+      console.error('Error starting recording:', error);
+      toast.error('Não foi possível iniciar a gravação de áudio');
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && recording) {
+      mediaRecorderRef.current.stop();
+      setRecording(false);
+      
+      // Stop all audio tracks
+      mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
+    }
+  };
+
+  const handleSingleChoice = (questionIndex, optionValue) => {
+    const updatedAnswers = [...answers];
+    updatedAnswers[questionIndex] = {
+      ...updatedAnswers[questionIndex],
+      question: survey.questions[questionIndex]._id,
+      selectedOptions: [optionValue]
+    };
+    setAnswers(updatedAnswers);
+  };
+
+  const handleMultipleChoice = (questionIndex, optionValue) => {
+    const updatedAnswers = [...answers];
+    const currentSelectedOptions = [...updatedAnswers[questionIndex].selectedOptions];
+    
+    // Toggle selection
+    if (currentSelectedOptions.includes(optionValue)) {
+      updatedAnswers[questionIndex] = {
+        ...updatedAnswers[questionIndex],
+        question: survey.questions[questionIndex]._id,
+        selectedOptions: currentSelectedOptions.filter(option => option !== optionValue)
+      };
+    } else {
+      updatedAnswers[questionIndex] = {
+        ...updatedAnswers[questionIndex],
+        question: survey.questions[questionIndex]._id,
+        selectedOptions: [...currentSelectedOptions, optionValue]
+      };
+    }
+    
+    setAnswers(updatedAnswers);
+  };
+
+  const handleOpenResponse = (questionIndex, value) => {
+    const updatedAnswers = [...answers];
+    updatedAnswers[questionIndex] = {
+      ...updatedAnswers[questionIndex],
+      question: survey.questions[questionIndex]._id,
+      openResponse: value
+    };
+    setAnswers(updatedAnswers);
+  };
+
+  const handleNextQuestion = () => {
+    const currentQuestion = survey.questions[currentQuestionIndex];
+    
+    // Validate current question
+    if (currentQuestion.required) {
+      const currentAnswer = answers[currentQuestionIndex];
+      
+      if (currentQuestion.type === 'open' && !currentAnswer.openResponse) {
+        toast.error('Por favor, responda a pergunta antes de continuar');
+        return;
+      }
+      
+      if (['single', 'single_with_open'].includes(currentQuestion.type) && 
+          currentAnswer.selectedOptions.length === 0) {
+        toast.error('Por favor, selecione uma opção antes de continuar');
+        return;
+      }
+      
+      if (['multiple', 'multiple_with_open'].includes(currentQuestion.type) && 
+          currentAnswer.selectedOptions.length === 0) {
+        toast.error('Por favor, selecione pelo menos uma opção antes de continuar');
+        return;
+      }
+      
+      if (['single_with_open', 'multiple_with_open'].includes(currentQuestion.type) && 
+          !currentAnswer.openResponse) {
+        toast.error('Por favor, preencha a resposta descritiva antes de continuar');
+        return;
+      }
+    }
+    
+    // Handle demographic questions
+    if (currentQuestion.isDemographic) {
+      if (currentQuestion.demographicType === 'gender') {
+        setDemographic({
+          ...demographic,
+          gender: answers[currentQuestionIndex].selectedOptions[0]
+        });
+      } else if (currentQuestion.demographicType === 'age') {
+        const ageRange = answers[currentQuestionIndex].selectedOptions[0].split('-');
+        setDemographic({
+          ...demographic,
+          ageRange: {
+            min: parseInt(ageRange[0]),
+            max: parseInt(ageRange[1])
+          }
+        });
+      } else if (currentQuestion.demographicType === 'location') {
+        setDemographic({
+          ...demographic,
+          location: {
+            ...demographic.location,
+            region: answers[currentQuestionIndex].selectedOptions[0],
+            state: survey.demographicFilters.locations.state,
+            city: survey.demographicFilters.locations.cities.length === 1 
+                ? survey.demographicFilters.locations.cities[0]
+                : answers[currentQuestionIndex].selectedOptions[0]
+          }
+        });
+      }
+    }
+    
+    // Go to next question
+    if (currentQuestionIndex < survey.questions.length - 1) {
+      setCurrentQuestionIndex(currentQuestionIndex + 1);
+    } else {
+      // Final validation before submission
+      const requiredQuestions = survey.questions.filter(q => q.required);
+      const unansweredQuestions = requiredQuestions.filter((q, index) => {
+        const answer = answers[index];
+        
+        if (q.type === 'open') {
+          return !answer.openResponse;
+        } else if (['single', 'single_with_open'].includes(q.type)) {
+          return answer.selectedOptions.length === 0;
+        } else if (['multiple', 'multiple_with_open'].includes(q.type)) {
+          return answer.selectedOptions.length === 0;
+        }
+        
+        return false;
+      });
+      
+      if (unansweredQuestions.length > 0) {
+        toast.error('Por favor, responda todas as perguntas obrigatórias antes de finalizar');
+        return;
+      }
+      
+      handleSubmit();
+    }
+  };
+
+  const handlePrevQuestion = () => {
+    if (currentQuestionIndex > 0) {
+      setCurrentQuestionIndex(currentQuestionIndex - 1);
+    }
+  };
+
+  const handleSubmit = async () => {
+    // Stop recording
+    stopRecording();
+    
+    setSubmitting(true);
+    
+    try {
+      // Prepare audio data if available
+      let audioData = null;
+      if (audioBlob) {
+        const reader = new FileReader();
+        audioData = await new Promise((resolve) => {
+          reader.onloadend = () => resolve(reader.result);
+          reader.readAsDataURL(audioBlob);
+        });
+      }
+      
+      // Submit response
+      await api.post(`/api/surveys/${surveyId}/responses`, {
+        answers,
+        demographic,
+        audioRecording: audioData,
+        coordinates: currentPosition,
+        responseMethod: 'web'
+      });
+      
+      toast.success('Resposta enviada com sucesso!');
+      navigate('/thank-you');
+    } catch (error) {
+      console.error('Error submitting response:', error);
+      toast.error('Erro ao enviar resposta. Por favor, tente novamente.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  if (loading) {
+    return <Loader />;
+  }
+
+  if (!survey) {
+    return (
+      <div className="max-w-4xl mx-auto p-6 text-center">
+        <h1 className="text-2xl font-bold text-red-500">Pesquisa não encontrada</h1>
+        <p className="mt-4">A pesquisa que você está procurando não existe ou foi removida.</p>
+      </div>
+    );
+  }
+
+  const currentQuestion = survey.questions[currentQuestionIndex];
+
+  return (
+    <div className="max-w-4xl mx-auto p-6">
+      <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="mb-4">
+          <h1 className="text-2xl font-bold mb-2">{survey.title}</h1>
+          {survey.description && <p className="text-gray-600">{survey.description}</p>}
+        </div>
+        
+        {/* Progress indicator */}
+        <div className="mb-6">
+          <div className="flex justify-between mb-1">
+            <span>Progresso</span>
+            <span>{currentQuestionIndex + 1} de {survey.questions.length}</span>
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-2.5">
+            <div 
+              className="bg-blue-600 h-2.5 rounded-full" 
+              style={{ width: `${((currentQuestionIndex + 1) / survey.questions.length) * 100}%` }}
+            ></div>
+          </div>
+        </div>
+        
+        {/* Recording indicator */}
+        {recording && (
+          <div className="flex items-center mb-4 text-red-500">
+            <div className="w-3 h-3 bg-red-500 rounded-full mr-2 animate-pulse"></div>
+            <span>Gravando áudio...</span>
+          </div>
+        )}
+        
+        {/* Current question */}
+        <div className="mb-6">
+          <h2 className="text-xl font-semibold mb-4">
+            {currentQuestionIndex + 1}. {currentQuestion.text}
+            {currentQuestion.required && <span className="text-red-500 ml-1">*</span>}
+          </h2>
+          
+          {/* Question options based on type */}
+          {currentQuestion.type === 'single' && (
+            <div className="space-y-2">
+              {currentQuestion.options.map((option, optionIndex) => (
+                <div key={optionIndex} className="flex items-center">
+                  <input 
+                    type="radio" 
+                    id={`option-${currentQuestionIndex}-${optionIndex}`}
+                    name={`question-${currentQuestionIndex}`}
+                    value={option.value}
+                    checked={answers[currentQuestionIndex].selectedOptions.includes(option.value)}
+                    onChange={() => handleSingleChoice(currentQuestionIndex, option.value)}
+                    className="mr-2"
+                  />
+                  <label htmlFor={`option-${currentQuestionIndex}-${optionIndex}`}>
+                    {option.text}
+                  </label>
+                </div>
+              ))}
+            </div>
+          )}
+          
+          {currentQuestion.type === 'multiple' && (
+            <div className="space-y-2">
+              {currentQuestion.options.map((option, optionIndex) => (
+                <div key={optionIndex} className="flex items-center">
+                  <input 
+                    type="checkbox" 
+                    id={`option-${currentQuestionIndex}-${optionIndex}`}
+                    value={option.value}
+                    checked={answers[currentQuestionIndex].selectedOptions.includes(option.value)}
+                    onChange={() => handleMultipleChoice(currentQuestionIndex, option.value)}
+                    className="mr-2"
+                  />
+                  <label htmlFor={`option-${currentQuestionIndex}-${optionIndex}`}>
+                    {option.text}
+                  </label>
+                </div>
+              ))}
+            </div>
+          )}
+          
+          {currentQuestion.type === 'open' && (
+            <textarea 
+              className="w-full p-2 border rounded"
+              rows="4"
+              value={answers[currentQuestionIndex].openResponse}
+              onChange={(e) => handleOpenResponse(currentQuestionIndex, e.target.value)}
+              placeholder="Digite sua resposta aqui..."
+            ></textarea>
+          )}
+          
+          {currentQuestion.type === 'single_with_open' && (
+            <div>
+              <div className="space-y-2 mb-4">
+                {currentQuestion.options.map((option, optionIndex) => (
+                  <div key={optionIndex} className="flex items-center">
+                    <input 
+                      type="radio" 
+                      id={`option-${currentQuestionIndex}-${optionIndex}`}
+                      name={`question-${currentQuestionIndex}`}
+                      value={option.value}
+                      checked={answers[currentQuestionIndex].selectedOptions.includes(option.value)}
+                      onChange={() => handleSingleChoice(currentQuestionIndex, option.value)}
+                      className="mr-2"
+                    />
+                    <label htmlFor={`option-${currentQuestionIndex}-${optionIndex}`}>
+                      {option.text}
+                    </label>
+                  </div>
+                ))}
+              </div>
+              
+              <div className="mt-4">
+                <label className="block text-gray-700 mb-2">Por favor, explique sua resposta:</label>
+                <textarea 
+                  className="w-full p-2 border rounded"
+                  rows="3"
+                  value={answers[currentQuestionIndex].openResponse}
+                  onChange={(e) => handleOpenResponse(currentQuestionIndex, e.target.value)}
+                  placeholder="Digite sua explicação aqui..."
+                ></textarea>
+              </div>
+            </div>
+          )}
+          
+          {currentQuestion.type === 'multiple_with_open' && (
+            <div>
+              <div className="space-y-2 mb-4">
+                {currentQuestion.options.map((option, optionIndex) => (
+                  <div key={optionIndex} className="flex items-center">
+                    <input 
+                      type="checkbox" 
+                      id={`option-${currentQuestionIndex}-${optionIndex}`}
+                      value={option.value}
+                      checked={answers[currentQuestionIndex].selectedOptions.includes(option.value)}
+                      onChange={() => handleMultipleChoice(currentQuestionIndex, option.value)}
+                      className="mr-2"
+                    />
+                    <label htmlFor={`option-${currentQuestionIndex}-${optionIndex}`}>
+                      {option.text}
+                    </label>
+                  </div>
+                ))}
+              </div>
+              
+              <div className="mt-4">
+                <label className="block text-gray-700 mb-2">Por favor, explique sua resposta:</label>
+                <textarea 
+                  className="w-full p-2 border rounded"
+                  rows="3"
+                  value={answers[currentQuestionIndex].openResponse}
+                  onChange={(e) => handleOpenResponse(currentQuestionIndex, e.target.value)}
+                  placeholder="Digite sua explicação aqui..."
+                ></textarea>
+              </div>
+            </div>
+          )}
+        </div>
+        
+        {/* Navigation buttons */}
+        <div className="flex justify-between">
+          <button 
+            className="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400"
+            onClick={handlePrevQuestion}
+            disabled={currentQuestionIndex === 0 || submitting}
+          >
+            Voltar
+          </button>
+          
+          <button 
+            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+            onClick={handleNextQuestion}
+            disabled={submitting}
+          >
+            {currentQuestionIndex === survey.questions.length - 1 ? 'Finalizar' : 'Próximo'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default SurveyResponse;
+
+Credits.jsx
+
+jsx
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../../contexts/AuthContext';
+import api from '../../utils/api';
+import { toast } from 'react-toastify';
+
+const Credits = () => {
+  const { user, updateUser } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const [transactionHistory, setTransactionHistory] = useState([]);
+  const [selectedMethod, setSelectedMethod] = useState('pix');
+  const [amount, setAmount] = useState(10);
+  const [pixData, setPixData] = useState(null);
+  const [paypalReady, setPaypalReady] = useState(false);
+
+  useEffect(() => {
+    // Load transaction history
+    const fetchTransactionHistory = async () => {
+      try {
+        const response = await api.get('/api/credits/history');
+        setTransactionHistory(response.data);
+      } catch (error) {
+        console.error('Error fetching transaction history:', error);
+        toast.error('Erro ao carregar histórico de transações');
+      }
+    };
+
+    fetchTransactionHistory();
+
+    // Initialize PayPal script
+    const script = document.createElement('script');
+    script.src = 'https://www.paypal.com/sdk/js?client-id=AZI2sTv8bYOkmVRO73vBUXQwupNyLRDQRARKALCehF_fa9lZydHeIYPOZX6X6-c53-l9ZgygdCqA_XHr&currency=BRL';
+    script.addEventListener('load', () => setPaypalReady(true));
+    document.body.appendChild(script);
+
+    return () => {
+      // Clean up PayPal script on unmount
+      if (document.body.contains(script)) {
+        document.body.removeChild(script);
+      }
+    };
+  }, []);
+
+  const handleAmountChange = (e) => {
+    const value = parseInt(e.target.value);
+    if (value > 0) {
+      setAmount(value);
+    }
+  };
+
+  const handleBuyCredits = async () => {
+    setLoading(true);
+    
+    try {
+      if (selectedMethod === 'pix') {
+        const response = await api.post('/api/credits/pix', { amount });
+        setPixData(response.data);
+      }
+      
+      setLoading(false);
+    } catch (error) {
+      console.error('Error initiating payment:', error);
+      toast.error('Erro ao iniciar pagamento');
+      setLoading(false);
+    }
+  };
+
+  const renderPayPalButton = () => {
+    if (!paypalReady) return null;
+    
+    return (
+      <div id="paypal-button-container" className="mt-4"></div>
+    );
+  };
+
+  useEffect(() => {
+    if (paypalReady && selectedMethod === 'paypal') {
+      window.paypal.Buttons({
+        createOrder: (data, actions) => {
+          return actions.order.create({
+            purchase_units: [
+              {
+                amount: {
+                  value: amount.toString()
+                }
+              }
+            ]
+          });
+        },
+        onApprove: async (data, actions) => {
+          try {
+            // Capture the funds from the transaction
+            const order = await actions.order.capture();
+            
+            // Process payment on your server
+            const response = await api.post('/api/credits/paypal', {
+              paymentId: order.id,
+              amount
+            });
+            
+            toast.success('Pagamento aprovado! Créditos adicionados.');
+            
+            // Update user credit balance
+            updateUser({
+              ...user,
+              credits: response.data.newCreditBalance
+            });
+          } catch (error) {
+            console.error('Error processing PayPal payment:', error);
+            toast.error('Erro ao processar pagamento PayPal');
+          }
+        },
+        onError: (err) => {
+          console.error('PayPal Error:', err);
+          toast.error('Erro durante o processamento do PayPal');
+        }
+      }).render('#paypal-button-container');
+    }
+  }, [paypalReady, selectedMethod, amount, user, updateUser]);
+
+  const copyPixCode = () => {
+    if (pixData?.pixCopyPaste) {
+      navigator.clipboard.writeText(pixData.pixCopyPaste);
+      toast.success('Código PIX copiado para a área de transferência');
+    }
+  };
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleString('pt-BR');
+  };
+
+  return (
+    <div className="max-w-4xl mx-auto p-6">
+      <h1 className="text-3xl font-bold mb-6">Gerenciar Créditos</h1>
+      
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Current balance */}
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <h2 className="text-xl font-semibold mb-4">Saldo Atual</h2>
+          <div className="text-3xl font-bold text-blue-600">{user?.credits || 0} créditos</div>
+          <p className="text-gray-500 mt-2">R$ 1,00 = 1 crédito</p>
+        </div>
+        
+        {/* Credit costs */}
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <h2 className="text-xl font-semibold mb-4">Custo por Envio</h2>
+          <ul className="space-y-2">
+            <li className="flex justify-between">
+              <span>Email</span>
+              <span className="font-semibold">0,50 créditos</span>
+            </li>
+            <li className="flex justify-between">
+              <span>SMS</span>
+              <span className="font-semibold">1,00 crédito</span>
+            </li>
+            <li className="flex justify-between">
+              <span>WhatsApp</span>
+              <span className="font-semibold">3,00 créditos</span>
+            </li>
+          </ul>
+        </div>
+        
+        {/* Buy credits */}
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <h2 className="text-xl font-semibold mb-4">Comprar Créditos</h2>
+          
+          <div className="mb-4">
+            <label className="block text-gray-700 mb-2">Quantidade</label>
+            <div className="flex items-center">
+              <button 
+                className="bg-gray-200 px-3 py-1 rounded-l"
+                onClick={() => amount > 1 && setAmount(amount - 1)}
+              >-</button>
+              <input 
+                type="number" 
+                className="w-20 p-2 border-t border-b text-center"
+                value={amount}
+                onChange={handleAmountChange}
+                min="1"
+              />
+              <button 
+                className="bg-gray-200 px-3 py-1 rounded-r"
+                onClick={() => setAmount(amount + 1)}
+              >+</button>
+              <span className="ml-2">créditos = R$ {amount.toFixed(2)}</span>
+            </div>
+          </div>
+          
+          <div className="mb-4">
+            <label className="block text-gray-700 mb-2">Método de Pagamento</label>
+            <div className="flex space-x-4">
+              <div className="flex items-center">
+                <input 
+                  type="radio" 
+                  id="pix" 
+                  value="pix"
+                  checked={selectedMethod === 'pix'}
+                  onChange={() => setSelectedMethod('pix')}
+                  className="mr-2"
+                />
+                <label htmlFor="pix">PIX</label>
+              </div>
+              <div className="flex items-center">
+                <input 
+                  type="radio" 
+                  id="paypal" 
+                  value="paypal"
+                  checked={selectedMethod === 'paypal'}
+                  onChange={() => setSelectedMethod('paypal')}
+                  className="mr-2"
+                />
+                <label htmlFor="paypal">PayPal</label>
+              </div>
+            </div>
+          </div>
+          
+          {selectedMethod === 'pix' ? (
+            <>
+              {pixData ? (
+                <div className="mt-4">
+                  <div className="mb-4">
+                    <h3 className="font-semibold mb-2">PIX QR Code</h3>
+                    <div className="flex justify-center">
+                      <img 
+                        src={pixData.qrCode} 
+                        alt="PIX QR Code" 
+                        className="w-48 h-48"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="mb-4">
+                    <h3 className="font-semibold mb-2">Código PIX Copia e Cola</h3>
+                    <div className="flex">
+                      <input 
+                        type="text" 
+                        className="flex-1 p-2 border rounded-l"
+                        value={pixData.pixCopyPaste}
+                        readOnly
+                      />
+                      <button
+                        className="bg-blue-500 text-white px-4 py-2 rounded-r hover:bg-blue-600"
+                        onClick={copyPixCode}
+                      >
+                        Copiar
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <p className="text-sm text-gray-500">
+                    O pagamento expira em {new Date(pixData.expiresAt).toLocaleTimeString()}.
+                    Após o pagamento, seus créditos serão adicionados automaticamente.
+                  </p>
+                  
+                  <button
+                    className="mt-4 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 w-full"
+                    onClick={() => setPixData(null)}
+                  >
+                    Gerar Novo PIX
+                  </button>
+                </div>
+              ) : (
+                <button
+                  className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 w-full"
+                  onClick={handleBuyCredits}
+                  disabled={loading}
+                >
+                  {loading ? 'Processando...' : 'Comprar Créditos'}
+                </button>
+              )}
+            </>
+          ) : (
+            renderPayPalButton()
+          )}
+        </div>
+      </div>
+      
+      {/* Transaction history */}
+      <div className="mt-8 bg-white rounded-lg shadow-md p-6">
+        <h2 className="text-xl font-semibold mb-4">Histórico de Transações</h2>
+        
+        {transactionHistory.length === 0 ? (
+          <p className="text-gray-500">Nenhuma transação encontrada.</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Data
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Tipo
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Créditos
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Descrição
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {transactionHistory.map((transaction) => (
+                  <tr key={transaction._id}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {formatDate(transaction.createdAt)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">
+                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                        transaction.transactionType === 'purchase' 
+                          ? 'bg-green-100 text-green-800' 
+                          : transaction.transactionType === 'usage'
+                            ? 'bg-red-100 text-red-800'
+                            : 'bg-yellow-100 text-yellow-800'
+                      }`}>
+                        {transaction.transactionType === 'purchase' 
+                          ? 'Compra' 
+                          : transaction.transactionType === 'usage'
+                            ? 'Uso'
+                            : 'Reembolso'}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <span className={transaction.amount > 0 ? 'text-green-600' : 'text-red-600'}>
+                        {transaction.amount > 0 ? '+' : ''}{transaction.amount}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-500">
+                      {transaction.description}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default Credits;
+
+Implementação do WhatsApp Bot
+whatsapp-bot/index.js
+
+javascript
+const { Client, LocalAuth } = require('whatsapp-web.js');
+const qrcode = require('qrcode-terminal');
+const axios = require('axios');
+const dotenv = require('dotenv');
+const fs = require('fs');
+const path = require('path');
+const { processMessage } = require('./handlers/messageHandler');
+const { connect } = require('./config/database');
+const logger = require('./utils/logger');
+
+dotenv.config();
+
+// Database connection
+connect();
+
+// Create client instance
+const client = new Client({
+  authStrategy: new LocalAuth(),
+  puppeteer: {
+    args: ['--no-sandbox', '--disable-setuid-sandbox']
+  }
+});
+
+// Generate QR code for authentication
+client.on('qr', (qr) => {
+  logger.info('QR code received. Scan it with your WhatsApp app:');
+  qrcode.generate(qr, { small: true });
+  
+  // Also save the QR code as an image for remote access
+  fs.writeFileSync(path.join(__dirname, 'qrcode.txt'), qr);
+});
+
+// On successful authentication
+client.on('authenticated', () => {
+  logger.info('WhatsApp authentication successful');
+});
+
+// On authentication failure
+client.on('auth_failure', (msg) => {
+  logger.error('WhatsApp authentication failed:', msg);
+});
+
+// When client is ready
+client.on('ready', () => {
+  logger.info('WhatsApp client is ready');
+  
+  // Register with the API server to receive survey distribution tasks
+  registerBot();
+});
+
+// On client disconnected
+client.on('disconnected', (reason) => {
+  logger.warn('WhatsApp client disconnected:', reason);
+  // Attempt to reconnect
+  client.initialize();
+});
+
+// Process incoming messages
+client.on('message', async (message) => {
+  try {
+    await processMessage(client, message);
+  } catch (error) {
+    logger.error('Error processing message:', error);
+  }
+});
+
+// Register bot with the API server
+async function registerBot() {
+  try {
+    const response = await axios.post(`${process.env.API_URL}/api/whatsapp/bots/register`, {
+      botId: process.env.BOT_ID,
+      name: process.env.BOT_NAME,
+      apiKey: process.env.API_KEY
+    });
+    
+    logger.info('Bot registered successfully:', response.data);
+  } catch (error) {
+    logger.error('Error registering bot:', error?.response?.data || error.message);
+  }
+}
+
+// Start the client
+client.initialize();
+
+// Handle process termination
+process.on('SIGINT', async () => {
+  logger.info('Shutting down WhatsApp bot...');
+  await client.destroy();
+  process.exit(0);
+});
+
+// Expose functions for external control
+module.exports = {
+  client,
+  sendMessage: async (phone, message) => {
+    try {
+      // Format phone number
+      const formattedPhone = phone.startsWith('+') ? phone.substring(1) : phone;
+      const chatId = `${formattedPhone}@c.us`;
+      
+      // Send message
+      const result = await client.sendMessage(chatId, message);
+      return result;
+    } catch (error) {
+      logger.error('Error sending message:', error);
+      throw error;
+    }
+  },
+  sendSurvey: async (phone, surveyData) => {
+    try {
+      // Format phone number
+      const formattedPhone = phone.startsWith('+') ? phone.substring(1) : phone;
+      const chatId = `${formattedPhone}@c.us`;
+      
+      // Store survey data in local database
+      const survey = await require('./models/PendingSurvey').create({
+        phone: formattedPhone,
+        surveyId: surveyData.surveyId,
+        questions: surveyData.questions,
+        currentQuestion: 0,
+        answers: [],
+        startedAt: new Date()
+      });
+      
+      // Send introduction message
+      await client.sendMessage(
+        chatId, 
+        `*${surveyData.title}*\n\n` +
+        `Olá! Você foi convidado a participar da nossa pesquisa. ` +
+        `Vou te fazer ${surveyData.questions.length} perguntas. ` +
+        `Para começar, responda com *INICIAR*.`
+      );
+      
+      return { success: true, surveyId: survey._id };
+    } catch (error) {
+      logger.error('Error sending survey:', error);
+      throw error;
+    }
+  }
+};
+
+whatsapp-bot/handlers/messageHandler.js
+
+javascript
+const PendingSurvey = require('../models/PendingSurvey');
+const axios = require('axios');
+const logger = require('../utils/logger');
+
+// Process incoming messages
+async function processMessage(client, message) {
+  // Skip non-text messages and messages from groups
+  if (!message.body || message.isGroupMsg) return;
+  
+  const chat = await message.getChat();
+  const contact = await message.getContact();
+  const phone = contact.number;
+  
+  logger.info(`Received message from ${phone}: ${message.body}`);
+  
+  // Check if there's an active survey for this user
+  const pendingSurvey = await PendingSurvey.findOne({ 
+    phone,
+    completed: false
+  }).sort({ startedAt: -1 });
+  
+  if (!pendingSurvey) {
+    // No active survey, this might be a direct message
+    await client.sendMessage(
+      message.from,
+      'Olá! Parece que você não possui nenhuma pesquisa ativa no momento. ' +
+      'Se você recebeu um convite para uma pesquisa, por favor, aguarde que ela será enviada em breve.'
+    );
+    return;
+  }
+  
+  // Handle INICIAR command
+  if (pendingSurvey.currentQuestion === 0 && 
+      message.body.trim().toUpperCase() === 'INICIAR') {
+    return sendNextQuestion(client, pendingSurvey);
+  }
+  
+  // Handle CANCELAR command
+  if (message.body.trim().toUpperCase() === 'CANCELAR') {
+    pendingSurvey.abandoned = true;
+    await pendingSurvey.save();
+    
+    await client.sendMessage(
+      message.from,
+      'Pesquisa cancelada. Obrigado pelo seu tempo!'
+    );
+    return;
+  }
+  
+  // Process answer for current question
+  const currentQuestion = pendingSurvey.questions[pendingSurvey.currentQuestion - 1];
+  if (!currentQuestion) return;
+  
+  const answer = message.body.trim();
+  
+  // Validate answer based on question type
+  let isValidAnswer = false;
+  let formattedAnswer = null;
+  
+  if (currentQuestion.type === 'open') {
+    // Any answer is valid for open questions
+    isValidAnswer = true;
+    formattedAnswer = {
+      question: currentQuestion._id,
+      openResponse: answer,
+      selectedOptions: []
+    };
+  } else if (['single', 'single_with_open'].includes(currentQuestion.type)) {
+    // For single choice, answer should be a number corresponding to an option
+    const optionNumber = parseInt(answer);
+    if (!isNaN(optionNumber) && optionNumber > 0 && optionNumber <= currentQuestion.options.length) {
+      isValidAnswer = true;
+      formattedAnswer = {
+        question: currentQuestion._id,
+        selectedOptions: [currentQuestion.options[optionNumber - 1].value]
+      };
+      
+      // If question requires open response, we need to ask for it
+      if (currentQuestion.type === 'single_with_open') {
+        pendingSurvey.pendingOpenResponse = true;
+        await pendingSurvey.save();
+        
+        await client.sendMessage(
+          message.from,
+          'Por favor, explique sua resposta:'
+        );
+        return;
+      }
+    }
+  } else if (['multiple', 'multiple_with_open'].includes(currentQuestion.type)) {
+    // For multiple choice, answer should be comma-separated numbers
+    const optionNumbers = answer.split(',').map(n => parseInt(n.trim())).filter(n => !isNaN(n));
+    const validOptions = optionNumbers.filter(n => n > 0 && n <= currentQuestion.options.length);
+    
+    if (validOptions.length > 0) {
+      isValidAnswer = true;
+      formattedAnswer = {
+        question: currentQuestion._id,
+        selectedOptions: validOptions.map(n => currentQuestion.options[n - 1].value)
+      };
+      
+      // If question requires open response, we need to ask for it
+      if (currentQuestion.type === 'multiple_with_open') {
+        pendingSurvey.pendingOpenResponse = true;
+        await pendingSurvey.save();
+        
+        await client.sendMessage(
+          message.from,
+          'Por favor, explique sua resposta:'
+        );
+        return;
+      }
+    }
+  }
+  
+  // Handle pending open response for single_with_open or multiple_with_open
+  if (pendingSurvey.pendingOpenResponse) {
+    pendingSurvey.pendingOpenResponse = false;
+    pendingSurvey.answers[pendingSurvey.answers.length - 1].openResponse = answer;
+    await pendingSurvey.save();
+    
+    return sendNextQuestion(client, pendingSurvey);
+  }
+  
+  if (!isValidAnswer) {
+    await client.sendMessage(
+      message.from,
+      'Desculpe, não entendi sua resposta. Por favor, responda conforme as instruções.'
+    );
+    return;
+  }
+  
+  // Save the answer
+  pendingSurvey.answers.push(formattedAnswer);
+  pendingSurvey.currentQuestion++;
+  await pendingSurvey.save();
+  
+  // Send next question or complete the survey
+  await sendNextQuestion(client, pendingSurvey);
+}
+
+// Send the next question to the user
+async function sendNextQuestion(client, survey) {
+  if (survey.currentQuestion === 0) {
+    // Starting the survey
+    survey.currentQuestion = 1;
+    await survey.save();
+  }
+  
+  if (survey.currentQuestion > survey.questions.length) {
+    // Survey completed
+    survey.completed = true;
+    survey.completedAt = new Date();
+    await survey.save();
+    
+    // Submit the survey responses to the API
+    try {
+      await axios.post(`${process.env.API_URL}/api/surveys/${survey.surveyId}/responses/whatsapp`, {
+        answers: survey.answers,
+        phone: survey.phone,
+        botId: process.env.BOT_ID,
+        apiKey: process.env.API_KEY
+      });
+      
+      await client.sendMessage(
+        `${survey.phone}@c.us`,
+        'Obrigado por completar a pesquisa! Suas respostas foram registradas com sucesso.'
+      );
+    } catch (error) {
+      logger.error('Error submitting survey responses:', error);
+      
+      await client.sendMessage(
+        `${survey.phone}@c.us`,
+        'Obrigado por completar a pesquisa! ' +
+        'Houve um problema ao registrar suas respostas, mas tentaremos novamente mais tarde.'
+      );
+    }
+    
+    return;
+  }
+  
+  // Get the current question
+  const question = survey.questions[survey.currentQuestion - 1];
+  
+  let questionText = `*Pergunta ${survey.currentQuestion} de ${survey.questions.length}*\n\n${question.text}`;
+  
+  // Add options for multiple-choice questions
+  if (['single', 'multiple', 'single_with_open', 'multiple_with_open'].includes(question.type)) {
+    questionText += '\n\n';
+    
+    question.options.forEach((option, index) => {
+      questionText += `${index + 1}. ${option.text}\n`;
+    });
+    
+    if (question.type === 'single' || question.type === 'single_with_open') {
+      questionText += '\n_Responda com o número da opção escolhida._';
+    } else {
+      questionText += '\n_Responda com os números das opções escolhidas, separados por vírgula (ex: 1,3)._';
+    }
+  }
+  
+  // Send the question
+  await client.sendMessage(`${survey.phone}@c.us`, questionText);
+}
+
+module.exports = { processMessage };
+
+Implementação do Banco de Dados
+database/migrations/01_create_tables.js
+
+javascript
+exports.up = function(knex) {
+  return Promise.all([
+    // Users table
+    knex.schema.createTable('users', function(table) {
+      table.increments('id').primary();
+      table.string('name').notNullable();
+      table.string('email').notNullable().unique();
+      table.string('password');
+      table.string('google_id');
+      table.string('role').defaultTo('owner');
+      table.integer('credits').defaultTo(0);
+      table.timestamps(true, true);
+    }),
+    
+    // Surveys table
+    knex.schema.createTable('surveys', function(table) {
+      table.increments('id').primary();
+      table.string('title').notNullable();
+      table.text('description');
+      table.integer('owner_id').unsigned().references('id').inTable('users');
+      table.string('survey_id').notNullable().unique();
+      table.string('status').defaultTo('draft');
+      table.json('demographic_filters');
+      table.integer('responses_count').defaultTo(0);
+      table.integer('response_goal').defaultTo(100);
+      table.timestamps(true, true);
+    }),
+    
+    // Questions table
+    knex.schema.createTable('questions', function(table) {
+      table.increments('id').primary();
+      table.integer('survey_id').unsigned().references('id').inTable('surveys').onDelete('CASCADE');
+      table.text('text').notNullable();
+      table.string('type').notNullable();
+      table.boolean('required').defaultTo(true);
+      table.json('options');
+      table.integer('order').notNullable();
+      table.boolean('is_demographic').defaultTo(false);
+      table.string('demographic_type');
+      table.timestamps(true, true);
+    }),
+    
+    // Survey researchers table (junction table)
+    knex.schema.createTable('survey_researchers', function(table) {
+      table.increments('id').primary();
+      table.integer('survey_id').unsigned().references('id').inTable('surveys').onDelete('CASCADE');
+      table.integer('user_id').unsigned().references('id').inTable('users').onDelete('CASCADE');
+      table.timestamps(true, true);
+    }),
+    
+    // Responses table
+    knex.schema.createTable('responses', function(table) {
+      table.increments('id').primary();
+      table.integer('survey_id').unsigned().references('id').inTable('surveys').onDelete('CASCADE');
+      table.integer('respondent_id').unsigned().references('id').inTable('users');
+      table.json('answers').notNullable();
+      table.json('demographic');
+      table.timestamp('completed_at');
+      table.string('ip_address');
+      table.string('device_info');
+      table.json('audio_recording');
+      table.string('response_method').notNullable();
+      table.timestamps(true, true);
+    }),
+    
+    // Credits table
+    knex.schema.createTable('credits', function(table) {
+      table.increments('id').primary();
+      table.integer('user_id').unsigned().references('id').inTable('users').onDelete('CASCADE');
+      table.decimal('amount', 10, 2).notNullable();
+      table.string('transaction_type').notNullable();
+      table.string('usage_type');
+      table.string('payment_method');
+      table.string('transaction_id');
+      table.text('description');
+      table.boolean('processed').defaultTo(false);
+      table.timestamps(true, true);
+    }),
+    
+    // Distribution table
+    knex.schema.createTable('distributions', function(table) {
+      table.increments('id').primary();
+      table.integer('survey_id').unsigned().references('id').inTable('surveys').onDelete('CASCADE');
+      table.string('distribution_type').notNullable();
+      table.string('recipient').notNullable();
+      table.string('status').defaultTo('pending');
+      table.timestamp('sent_at');
+      table.timestamp('responded_at');
+      table.integer('credit_cost');
+      table.string('transaction_id');
+      table.timestamps(true, true);
+    })
+  ]);
+};
+
+exports.down = function(knex) {
+  return Promise.all([
+    knex.schema.dropTable('distributions'),
+    knex.schema.dropTable('credits'),
+    knex.schema.dropTable('responses'),
+    knex.schema.dropTable('survey_researchers'),
+    knex.schema.dropTable('questions'),
+    knex.schema.dropTable('surveys'),
+    knex.schema.dropTable('users')
+  ]);
+};
+
+Docker Configuration
+docker-compose.yml
+
+yaml
+version: '3.8'
+
+services:
+  # Backend API service
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: survey-app-backend
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - PORT=5000
+      - MONGO_URI=mongodb://mongo:27017/survey-app
+      - JWT_SECRET=${JWT_SECRET}
+      - SMTP_HOST=${SMTP_HOST}
+      - SMTP_PORT=${SMTP_PORT}
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
+      - SMS_API_KEY=${SMS_API_KEY}
+      - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
+      - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
+      - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
+      - PAYPAL_CLIENT_ID=${PAYPAL_CLIENT_ID}
+      - PAYPAL_CLIENT_SECRET=${PAYPAL_CLIENT_SECRET}
+      - PIX_KEY=${PIX_KEY}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+    depends_on:
+      - mongo
+      - redis
+
+  # Frontend service
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: survey-app-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - REACT_APP_API_URL=http://localhost:5000/api
+    depends_on:
+      - backend
+
+  # WhatsApp bot service
+  whatsapp-bot:
+    build:
+      context: ./whatsapp-bot
+      dockerfile: Dockerfile
+    container_name: survey-app-whatsapp-bot
+    restart: unless-stopped
+    volumes:
+      - ./whatsapp-bot:/app
+      - /app/node_modules
+      - ./whatsapp-bot/session:/app/.wwebjs_auth
+    environment:
+      - NODE_ENV=development
+      - API_URL=http://backend:5000
+      - API_KEY=${WHATSAPP_BOT_API_KEY}
+      - BOT_ID=${WHATSAPP_BOT_ID}
+      - BOT_NAME=${WHATSAPP_BOT_NAME}
+    depends_on:
+      - backend
+
+  # MongoDB service
+  mongo:
+    image: mongo:latest
+    container_name: survey-app-mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+  # Redis for caching and queue management
+  redis:
+    image: redis:alpine
+    container_name: survey-app-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+
+  # Background job worker
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.worker
+    container_name: survey-app-worker
+    restart: unless-stopped
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - MONGO_URI=mongodb://mongo:27017/survey-app
+      - REDIS_URL=redis://redis:6379
+      - SMS_API_KEY=${SMS_API_KEY}
+      - SMTP_HOST=${SMTP_HOST}
+      - SMTP_PORT=${SMTP_PORT}
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
+    depends_on:
+      - mongo
+      - redis
+      - backend
+
+volumes:
+  mongo-data:
+  redis-data:
+
+Conclusão
+Este projeto implementa um sistema completo de pesquisa com as seguintes características principais:
+
+Autenticação: Login por email/senha ou Google
+Criação de Pesquisas: Interface intuitiva para criar pesquisas com filtros demográficos
+Tipos de Perguntas: Suporte para escolha única, múltipla escolha e respostas abertas
+Compartilhamento: Pesquisas podem ser compartilhadas por ID, link, email, SMS ou WhatsApp
+Coleta de Dados: Captura de áudio e geolocalização durante as respostas
+Dashboard: Visualização de resultados em tempo real
+Sistema de Créditos: Pagamentos por PIX ou PayPal para envio de pesquisas
+Integração WhatsApp: Bot para realização de pesquisas via chat
+Administração: Painel de superadmin para gerenciar o sistema
+Armazenamento Offline: Banco de dados local para funcionamento sem internet
